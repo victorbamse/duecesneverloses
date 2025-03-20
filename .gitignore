@@ -26,3 +26,7 @@ yarn-error.log*
 *.swp
 *.swo
 node_modules
+
+# Docker
+.docker/
+docker-compose.override.yml
