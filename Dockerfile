@@ -2,10 +2,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY server/package*.json ./
-COPY server/dist ./dist
+# Kopiera hela server-mappen
+COPY server ./
 
-RUN npm install --production
+# Installera alla dependencies inklusive devDependencies
+RUN npm install
+
+# Bygg projektet
+RUN npm run build
+
+# Ta bort devDependencies
+RUN npm prune --production
 
 ENV PORT=3001
 ENV NODE_ENV=production
