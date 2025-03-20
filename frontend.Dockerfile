@@ -1,21 +1,29 @@
-FROM node:18-alpine
+FROM node:18-alpine as build
 
 WORKDIR /app
 
-# Kopiera package.json och package-lock.json
+# Kopiera frontend package.json
 COPY package*.json ./
 
 # Installera dependencies
 RUN npm install
 
-# Kopiera resten av frontend-koden
+# Kopiera frontend-koden
 COPY . .
 
 # Bygg frontend
 RUN npm run build
 
-# Installera en enkel server för att servera statiska filer
+# Produktionssteg
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Installera serve globalt
 RUN npm install -g serve
+
+# Kopiera byggda filer från build-steget
+COPY --from=build /app/dist ./dist
 
 EXPOSE 3000
 
