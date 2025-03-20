@@ -1,1 +1,0 @@
-web: cd server && npm install --production --no-package-lock && npm run build && npm start 
