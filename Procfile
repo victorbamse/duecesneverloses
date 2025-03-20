@@ -1,1 +1,1 @@
-web: cd server && npm install && npm run build && npm start 
+web: cd server && npm install --legacy-peer-deps && npm run build && npm start 
