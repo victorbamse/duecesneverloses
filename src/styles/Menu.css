@@ -1,0 +1,54 @@
+.menu-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #1a1a1a;
+}
+
+.menu-container h1 {
+  color: #ffd700;
+  font-size: 3rem;
+  margin-bottom: 3rem;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.menu-options {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.menu-card {
+  background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 300px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.menu-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.menu-card h2 {
+  color: #ffd700;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.menu-card p {
+  color: #cccccc;
+  font-size: 1.1rem;
+  line-height: 1.5;
+} 

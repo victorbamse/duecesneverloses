@@ -1,0 +1,192 @@
+.multiplayer-container {
+  width: 100%;
+  height: 100vh;
+  background-color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.poker-table-wrapper {
+  width: 1400px;
+  height: 900px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 160px; /* Add padding to prevent seat clipping */
+}
+
+.poker-felt {
+  width: 1100px;
+  height: 600px;
+  background: #267f00;
+  border-radius: 150px;
+  border: 30px solid #4a3500;
+  position: relative;
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.5),
+    0 0 30px rgba(0, 0, 0, 0.3);
+}
+
+.table-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.community-cards-area {
+  display: flex;
+  gap: 10px;
+}
+
+.card-placeholder {
+  width: 70px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+}
+
+.pot-area {
+  color: white;
+  font-size: 1.2rem;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.seat {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transform-origin: center center;
+}
+
+.chair {
+  width: 60px;
+  height: 80px;
+  position: relative;
+}
+
+.chair-back {
+  width: 60px;
+  height: 40px;
+  background: #333;
+  border-radius: 10px 10px 0 0;
+}
+
+.chair-seat {
+  width: 60px;
+  height: 20px;
+  background: #444;
+  border-radius: 0 0 10px 10px;
+  margin-top: 5px;
+}
+
+.player-area {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  min-width: 150px;
+  transform: rotate(0deg);
+  position: relative;
+  z-index: 1;
+}
+
+.player-cards {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 5px;
+  justify-content: center;
+  transform: rotate(0deg);
+}
+
+.player-info {
+  color: white;
+  transform: rotate(0deg);
+}
+
+.player-name {
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+}
+
+.player-chips {
+  color: #ffd700;
+  font-size: 0.8rem;
+}
+
+/* Seat positions - evenly distributed around the table with more space */
+.seat-0 { /* Bottom */
+  bottom: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.seat-1 { /* Bottom Right */
+  bottom: -60px;
+  right: -120px;
+  transform: rotate(-45deg);
+}
+
+.seat-2 { /* Right */
+  top: 50%;
+  right: -180px;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.seat-3 { /* Top Right */
+  top: -60px;
+  right: -120px;
+  transform: rotate(-135deg);
+}
+
+.seat-4 { /* Top */
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%) rotate(180deg);
+}
+
+.seat-5 { /* Top Left */
+  top: -60px;
+  left: -120px;
+  transform: rotate(135deg);
+}
+
+.seat-6 { /* Left */
+  top: 50%;
+  left: -180px;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.seat-7 { /* Bottom Left */
+  bottom: -60px;
+  left: -120px;
+  transform: rotate(45deg);
+}
+
+.return-button {
+  margin-top: 2rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  background-color: #4a4a4a;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.return-button:hover {
+  background-color: #5a5a5a;
+  transform: translateY(-2px);
+} 
