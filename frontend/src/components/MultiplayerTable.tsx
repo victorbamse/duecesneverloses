@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/MultiplayerTable.css';
-import { Card } from './Game';
+import { Card } from '../utils/pokerAI';
 
 interface Player {
   id: string;
