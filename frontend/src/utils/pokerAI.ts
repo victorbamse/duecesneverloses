@@ -1,15 +1,209 @@
-interface Card {
+// Types
+export interface Card {
   suit: 'hearts' | 'diamonds' | 'clubs' | 'spades'
   value: string
 }
 
-interface HandStrength {
+export interface HandStrength {
   rank: string;
   value: string;
 }
 
+// Pre-flop hand rankings (simplified GTO approach)
+interface HandRanking {
+  hand: string;  // e.g. "AKs" for Ace-King suited, "TT" for pocket tens
+  value: number; // 0-100, higher is better
+}
+
 const valueOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 
+// GTO-based pre-flop hand rankings (simplified)
+const preFlopHandRankings: { [key: string]: number } = {
+  'AA': 100, 'KK': 95, 'QQ': 90, 'AKs': 85, 'JJ': 80,
+  'AQs': 75, 'KQs': 70, 'AJs': 68, 'KJs': 65, 'TT': 63,
+  'ATs': 60, 'KTs': 58, 'QJs': 55, 'JTs': 53, '99': 50,
+  'AK': 48, 'AQ': 45, 'KQ': 43, '88': 40, 'K9s': 38,
+  'T9s': 35, '77': 33, '66': 30, '55': 28, '44': 25,
+  '33': 23, '22': 20
+}
+
+// Get the hand ranking key (e.g. "AKs" for Ace-King suited)
+const getHandKey = (hand: Card[]): string => {
+  if (!hand || hand.length !== 2) return ''
+  
+  const [card1, card2] = hand.sort((a, b) => 
+    valueOrder.indexOf(b.value) - valueOrder.indexOf(a.value)
+  )
+  
+  // Pocket pair
+  if (card1.value === card2.value) {
+    return card1.value + card1.value
+  }
+  
+  // Suited or offsuit
+  const suited = card1.suit === card2.suit ? 's' : ''
+  return card1.value + card2.value + suited
+}
+
+// Calculate pot odds (simplified)
+const calculatePotOdds = (callAmount: number, potSize: number): number => {
+  return callAmount / (potSize + callAmount)
+}
+
+// Calculate position strength (0-1)
+const getPositionStrength = (
+  isButton: boolean,
+  isSB: boolean,
+  isBB: boolean
+): number => {
+  if (isButton) return 1
+  if (isSB) return 0.3
+  if (isBB) return 0.4
+  return 0.6
+}
+
+// Main betting decision function
+const calculateBettingDecision = (
+  aiHand: Card[],
+  communityCards: Card[],
+  handStrength: HandStrength | null,
+  pot: number,
+  aiChips: number,
+  gameStage: 'pre-flop' | 'flop' | 'turn' | 'river' | 'complete',
+  position: {
+    isButton: boolean,
+    isSB: boolean,
+    isBB: boolean
+  },
+  currentBet: number,
+  aiCurrentBet: number,
+  bigBlind: number
+): { 
+  action: 'fold' | 'check' | 'call' | 'raise',
+  amount: number 
+} => {
+  const handKey = getHandKey(aiHand)
+  const handValue = preFlopHandRankings[handKey] || 15 // Default to low value for unmapped hands
+  const positionStrength = getPositionStrength(position.isButton, position.isSB, position.isBB)
+  const callAmount = currentBet - aiCurrentBet
+  const potOdds = calculatePotOdds(callAmount, pot)
+  
+  // Pre-flop strategy
+  if (gameStage === 'pre-flop') {
+    // Small Blind decision
+    if (position.isSB) {
+      // Must at least call to see flop
+      const minCall = bigBlind - (bigBlind / 2) // Need to add the other half of BB
+      
+      if (handValue >= 60) {
+        // Strong hand - raise
+        return {
+          action: 'raise',
+          amount: Math.min(bigBlind * 3, aiChips)
+        }
+      } else if (handValue >= 30) {
+        // Playable hand - call
+        return {
+          action: 'call',
+          amount: minCall
+        }
+      } else {
+        // Weak hand - fold
+        return {
+          action: 'fold',
+          amount: 0
+        }
+      }
+    }
+    
+    // Big Blind decision
+    if (position.isBB) {
+      if (currentBet > bigBlind) {
+        // Someone raised
+        if (handValue >= 50) {
+          // Strong enough to re-raise
+          return {
+            action: 'raise',
+            amount: Math.min(currentBet * 2.5, aiChips)
+          }
+        } else if (handValue >= 25) {
+          // Call the raise
+          return {
+            action: 'call',
+            amount: callAmount
+          }
+        } else {
+          return {
+            action: 'fold',
+            amount: 0
+          }
+        }
+      } else {
+        // No raise, can check
+        if (handValue >= 40) {
+          // Raise with strong hands
+          return {
+            action: 'raise',
+            amount: Math.min(bigBlind * 2, aiChips)
+          }
+        } else {
+          return {
+            action: 'check',
+            amount: 0
+          }
+        }
+      }
+    }
+  }
+
+  // Post-flop strategy (simplified GTO approach)
+  const handScore = handStrength ? getHandScore(handStrength) : 0
+  
+  if (handScore >= 7) { // Very strong hand (Full house or better)
+    return {
+      action: 'raise',
+      amount: Math.min(pot * 0.75, aiChips)
+    }
+  } else if (handScore >= 5) { // Strong hand (Straight or better)
+    if (currentBet > aiCurrentBet) {
+      return {
+        action: 'call',
+        amount: callAmount
+      }
+    } else {
+      return {
+        action: 'raise',
+        amount: Math.min(pot * 0.5, aiChips)
+      }
+    }
+  } else if (handScore >= 3) { // Medium hand (Two pair or better)
+    if (currentBet > pot * 0.5) {
+      return {
+        action: 'fold',
+        amount: 0
+      }
+    } else {
+      return {
+        action: 'call',
+        amount: callAmount
+      }
+    }
+  } else { // Weak hand
+    if (currentBet === aiCurrentBet) {
+      return {
+        action: 'check',
+        amount: 0
+      }
+    } else {
+      return {
+        action: 'fold',
+        amount: 0
+      }
+    }
+  }
+}
+
+// Helper function to get numeric hand score
 const getHandScore = (handRank: HandStrength): number => {
   const rankScores: { [key: string]: number } = {
     'Royal Flush': 10,
@@ -23,126 +217,8 @@ const getHandScore = (handRank: HandStrength): number => {
     'One Pair': 2,
     'High Card': 1
   }
-
   return rankScores[handRank.rank] || 0
 }
 
-const getValueStrength = (value: string): number => {
-  return valueOrder.indexOf(value)
-}
-
-/**
- * Calculates betting odds for the AI player
- * @param aiHand The AI's hole cards
- * @param _communityCards The community cards on the table (currently unused)
- * @param handStrength Current hand strength
- * @param pot Current pot size
- * @param aiChips AI's remaining chips
- * @param gameStage Current stage of the game
- * @param position AI's position at the table
- * @param currentBet Current bet to call
- */
-const calculateBettingOdds = (
-  aiHand: Card[],
-  _communityCards: Card[],
-  handStrength: HandStrength,
-  pot: number,
-  aiChips: number,
-  gameStage: 'pre-flop' | 'flop' | 'turn' | 'river' | 'complete',
-  position: 'early' | 'middle' | 'late' = 'late',
-  currentBet: number = 0
-): { shouldBet: boolean; betAmount: number; shouldCall: boolean } => {
-  const handScore = getHandScore(handStrength)
-  const callAmount = currentBet
-  
-  // Pre-flop strategy
-  if (gameStage === 'pre-flop') {
-    const highCard = Math.max(...aiHand.map(card => getValueStrength(card.value)))
-    const isPair = aiHand[0].value === aiHand[1].value
-    const isHighCards = aiHand.every(card => getValueStrength(card.value) >= valueOrder.indexOf('J'))
-    const isSuited = aiHand[0].suit === aiHand[1].suit
-    
-    // Premium hands
-    if (isPair && getValueStrength(aiHand[0].value) >= valueOrder.indexOf('J')) {
-      return {
-        shouldBet: true,
-        betAmount: Math.min(pot * 0.75, aiChips * 0.3),
-        shouldCall: true
-      }
-    }
-    
-    // Strong hands
-    if (isPair || (isHighCards && isSuited)) {
-      return {
-        shouldBet: true,
-        betAmount: Math.min(pot * 0.5, aiChips * 0.2),
-        shouldCall: true
-      }
-    }
-    
-    // Playable hands
-    if (highCard >= valueOrder.indexOf('Q') || (isSuited && position === 'late')) {
-      return {
-        shouldBet: position === 'late',
-        betAmount: Math.min(pot * 0.25, aiChips * 0.1),
-        shouldCall: callAmount <= aiChips * 0.1
-      }
-    }
-    
-    // Weak hands
-    return {
-      shouldBet: false,
-      betAmount: 0,
-      shouldCall: callAmount <= aiChips * 0.05
-    }
-  }
-
-  // Post-flop strategy based on hand strength
-  const betSizing: { [key: number]: number } = {
-    10: 1, // Royal Flush
-    9: 0.8, // Straight Flush
-    8: 0.7, // Four of a Kind
-    7: 0.6, // Full House
-    6: 0.5, // Flush
-    5: 0.4, // Straight
-    4: 0.3, // Three of a Kind
-    3: 0.2, // Two Pairs
-    2: 0.1, // One Pair
-    1: 0 // High Card
-  }
-
-  const sizingMultiplier = betSizing[handScore] || 0
-  const randomFactor = 0.8 + Math.random() * 0.4 // Add some randomness
-  const potOdds = callAmount / (pot + callAmount)
-
-  // Calculate implied odds based on hand strength and stage
-  const impliedOdds = handScore / 10 * (1 + (gameStage === 'river' ? 0 : 0.2))
-
-  if (impliedOdds > potOdds && sizingMultiplier > 0) {
-    const baseBet = pot * sizingMultiplier * randomFactor
-    const maxBet = aiChips * 0.5 // Never bet more than 50% of chips at once
-    return {
-      shouldBet: true,
-      betAmount: Math.min(baseBet, maxBet),
-      shouldCall: true
-    }
-  }
-
-  // Check/Call with medium strength hands if pot odds are good
-  if (handScore >= 2 && potOdds < 0.3) {
-    return {
-      shouldBet: false,
-      betAmount: 0,
-      shouldCall: true
-    }
-  }
-
-  // Fold with weak hands
-  return {
-    shouldBet: false,
-    betAmount: 0,
-    shouldCall: false
-  }
-}
-
-export { calculateBettingOdds, type HandStrength } 
+// Export the function
+export { calculateBettingDecision } 

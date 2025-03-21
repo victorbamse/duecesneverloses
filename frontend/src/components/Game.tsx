@@ -3,16 +3,14 @@ import Card from './Card'
 import getHandRank from '../utils/handEvaluator'
 import { calculateBettingDecision, type HandStrength, type Card as PokerCard } from '../utils/pokerAI'
 
-interface Card {
-  suit: 'hearts' | 'diamonds' | 'clubs' | 'spades'
-  value: string
-}
+// Remove the local Card interface since we're using the one from pokerAI
+type GameCard = PokerCard;
 
 const Game: React.FC = () => {
-  const [deck, setDeck] = useState<Card[]>([])
-  const [playerHand, setPlayerHand] = useState<Card[]>([])
-  const [aiHand, setAiHand] = useState<Card[]>([])
-  const [communityCards, setCommunityCards] = useState<Card[]>([])
+  const [deck, setDeck] = useState<GameCard[]>([])
+  const [playerHand, setPlayerHand] = useState<GameCard[]>([])
+  const [aiHand, setAiHand] = useState<GameCard[]>([])
+  const [communityCards, setCommunityCards] = useState<GameCard[]>([])
   const [handRank, setHandRank] = useState<HandStrength | null>(null)
   const [aiHandRank, setAiHandRank] = useState<HandStrength | null>(null)
   const [chips, setChips] = useState(1000)
@@ -205,16 +203,16 @@ const Game: React.FC = () => {
   }
 
   const createDeck = () => {
-    const newDeck: Card[] = []
+    const newDeck: GameCard[] = []
     for (const suit of suits) {
       for (const value of values) {
-        newDeck.push({ suit: suit as Card['suit'], value })
+        newDeck.push({ suit: suit as GameCard['suit'], value })
       }
     }
     return shuffleDeck(newDeck)
   }
 
-  const shuffleDeck = (deck: Card[]): Card[] => {
+  const shuffleDeck = (deck: GameCard[]): GameCard[] => {
     const shuffled = [...deck]
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
@@ -359,15 +357,6 @@ const Game: React.FC = () => {
       setAiHandRank(getHandRank(aiHand, newCommunityCards))
       setGameStage('river')
     }
-  }
-
-  // Add new function to handle action messages
-  const showActionMessage = (message: string) => {
-    setAiAction(message)
-    // Clear message after 3 seconds
-    setTimeout(() => {
-      setAiAction('')
-    }, 3000)
   }
 
   return (
