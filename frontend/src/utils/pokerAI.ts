@@ -9,12 +9,6 @@ export interface HandStrength {
   value: string;
 }
 
-// Pre-flop hand rankings (simplified GTO approach)
-interface HandRanking {
-  hand: string;  // e.g. "AKs" for Ace-King suited, "TT" for pocket tens
-  value: number; // 0-100, higher is better
-}
-
 const valueOrder = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
 
 // GTO-based pre-flop hand rankings (simplified)
@@ -45,21 +39,21 @@ const getHandKey = (hand: Card[]): string => {
   return card1.value + card2.value + suited
 }
 
-// Calculate pot odds (simplified)
-const calculatePotOdds = (callAmount: number, potSize: number): number => {
-  return callAmount / (potSize + callAmount)
-}
-
-// Calculate position strength (0-1)
-const getPositionStrength = (
-  isButton: boolean,
-  isSB: boolean,
-  isBB: boolean
-): number => {
-  if (isButton) return 1
-  if (isSB) return 0.3
-  if (isBB) return 0.4
-  return 0.6
+// Helper function to get numeric hand score
+const getHandScore = (handRank: HandStrength): number => {
+  const rankScores: { [key: string]: number } = {
+    'Royal Flush': 10,
+    'Straight Flush': 9,
+    'Four of a Kind': 8,
+    'Full House': 7,
+    'Flush': 6,
+    'Straight': 5,
+    'Three of a Kind': 4,
+    'Two Pairs': 3,
+    'One Pair': 2,
+    'High Card': 1
+  }
+  return rankScores[handRank.rank] || 0
 }
 
 // Main betting decision function
@@ -205,21 +199,4 @@ export const calculateBettingDecision = (
     action: 'fold',
     amount: 0
   }
-}
-
-// Helper function to get numeric hand score
-const getHandScore = (handRank: HandStrength): number => {
-  const rankScores: { [key: string]: number } = {
-    'Royal Flush': 10,
-    'Straight Flush': 9,
-    'Four of a Kind': 8,
-    'Full House': 7,
-    'Flush': 6,
-    'Straight': 5,
-    'Three of a Kind': 4,
-    'Two Pairs': 3,
-    'One Pair': 2,
-    'High Card': 1
-  }
-  return rankScores[handRank.rank] || 0
 } 
