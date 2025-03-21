@@ -245,10 +245,11 @@ const Game: React.FC = () => {
 
       if (gameStage === 'pre-flop') {
         if (isPlayerDealer) {
-          // AI is SB
+          // Player is dealer (BB), AI is SB
           if (lastAction === 'none') {
-            // First action as SB
-            if (shouldBet) {
+            // First action as SB - must call 10 more or raise
+            if (shouldBet && aiBetAmount > bigBlind) {
+              // AI wants to raise
               const actualBet = Math.min(aiBetAmount, aiChips)
               const raiseAmount = actualBet - aiCurrentBet
               setAiChips(prev => prev - raiseAmount)
@@ -259,9 +260,10 @@ const Game: React.FC = () => {
               addToHistory(message)
               showActionMessage(message)
               setLastAction('raise')
+              setNeedsToCall(true)
             } else {
-              // Complete small blind
-              const callAmount = bigBlind - bigBlind / 2
+              // AI calls to complete small blind
+              const callAmount = bigBlind - bigBlind/2  // Need to add 10 more to match BB
               setAiChips(prev => prev - callAmount)
               setPot(prev => prev + callAmount)
               setAiCurrentBet(bigBlind)
@@ -270,13 +272,70 @@ const Game: React.FC = () => {
               addToHistory(message)
               showActionMessage(message)
               setLastAction('call')
+              setNeedsToCall(false)
+              setCanCheck(true)
+            }
+          } else if (lastAction === 'raise') {
+            // BB has raised, AI must call, raise, or fold
+            if (shouldBet && aiBetAmount > currentBet) {
+              // AI re-raises
+              const actualBet = Math.min(aiBetAmount, aiChips)
+              const raiseAmount = actualBet - aiCurrentBet
+              setAiChips(prev => prev - raiseAmount)
+              setPot(prev => prev + raiseAmount)
+              setAiCurrentBet(actualBet)
+              playSound('bet')
+              const message = `AI (Small Blind) re-raises to $${actualBet}`
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('raise')
+              setNeedsToCall(true)
+            } else if (shouldCall) {
+              // AI calls the raise
+              const callAmount = currentBet - aiCurrentBet
+              setAiChips(prev => prev - callAmount)
+              setPot(prev => prev + callAmount)
+              setAiCurrentBet(currentBet)
+              playSound('check')
+              const message = 'AI (Small Blind) calls'
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('call')
+              dealFlop()
+            } else {
+              // AI folds
+              playSound('fold')
+              const message = 'AI (Small Blind) folds'
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('fold')
+              setGameStage('complete')
+              setChips(prev => prev + pot)
+              setTimeout(() => {
+                showActionMessage('Player wins!')
+                playSound('win')
+              }, 1000)
             }
           }
         } else {
-          // AI is BB
+          // AI is BB, player is SB
           if (lastAction === 'raise') {
-            // Player has raised
-            if (shouldCall) {
+            // Player has raised, AI must call, raise, or fold
+            if (shouldBet && aiBetAmount > currentBet) {
+              // AI re-raises
+              const actualBet = Math.min(aiBetAmount, aiChips)
+              const raiseAmount = actualBet - aiCurrentBet
+              setAiChips(prev => prev - raiseAmount)
+              setPot(prev => prev + raiseAmount)
+              setAiCurrentBet(actualBet)
+              playSound('bet')
+              const message = `AI (Big Blind) re-raises to $${actualBet}`
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('raise')
+              setNeedsToCall(true)
+            } else if (shouldCall) {
+              // AI calls the raise
               const callAmount = currentBet - aiCurrentBet
               setAiChips(prev => prev - callAmount)
               setPot(prev => prev + callAmount)
@@ -286,7 +345,9 @@ const Game: React.FC = () => {
               addToHistory(message)
               showActionMessage(message)
               setLastAction('call')
+              dealFlop()
             } else {
+              // AI folds
               playSound('fold')
               const message = 'AI (Big Blind) folds'
               addToHistory(message)
@@ -299,25 +360,30 @@ const Game: React.FC = () => {
                 playSound('win')
               }, 1000)
             }
-          } else if (shouldBet) {
-            // Player has just called BB
-            const actualBet = Math.min(aiBetAmount, aiChips)
-            const raiseAmount = actualBet - aiCurrentBet
-            setAiChips(prev => prev - raiseAmount)
-            setPot(prev => prev + raiseAmount)
-            setAiCurrentBet(actualBet)
-            playSound('bet')
-            const message = `AI (Big Blind) raises to $${actualBet}`
-            addToHistory(message)
-            showActionMessage(message)
-            setLastAction('raise')
-          } else {
-            // Check BB
-            playSound('check')
-            const message = 'AI (Big Blind) checks'
-            addToHistory(message)
-            showActionMessage(message)
-            setLastAction('check')
+          } else if (lastAction === 'call') {
+            // Player has just called BB, AI can check or raise
+            if (shouldBet) {
+              // AI raises
+              const actualBet = Math.min(aiBetAmount, aiChips)
+              const raiseAmount = actualBet - aiCurrentBet
+              setAiChips(prev => prev - raiseAmount)
+              setPot(prev => prev + raiseAmount)
+              setAiCurrentBet(actualBet)
+              playSound('bet')
+              const message = `AI (Big Blind) raises to $${actualBet}`
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('raise')
+              setNeedsToCall(true)
+            } else {
+              // AI checks
+              playSound('check')
+              const message = 'AI (Big Blind) checks'
+              addToHistory(message)
+              showActionMessage(message)
+              setLastAction('check')
+              dealFlop()
+            }
           }
         }
       } else {
