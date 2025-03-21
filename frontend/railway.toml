@@ -1,4 +1,9 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
-buildPath = "frontend" 
+buildPath = "frontend"
+
+[deploy]
+startCommand = "serve -s dist -l 3000"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10 
