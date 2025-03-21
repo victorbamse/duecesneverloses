@@ -31,6 +31,17 @@ const getValueStrength = (value: string): number => {
   return valueOrder.indexOf(value)
 }
 
+/**
+ * Calculates betting odds for the AI player
+ * @param aiHand The AI's hole cards
+ * @param communityCards The community cards on the table
+ * @param handStrength Current hand strength
+ * @param pot Current pot size
+ * @param aiChips AI's remaining chips
+ * @param gameStage Current stage of the game
+ * @param position AI's position at the table
+ * @param currentBet Current bet to call
+ */
 const calculateBettingOdds = (
   aiHand: Card[],
   communityCards: Card[],

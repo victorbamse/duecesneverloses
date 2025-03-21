@@ -21,8 +21,6 @@ const Card: React.FC<CardProps> = ({ suit, value }) => {
     }
   }
 
-  const isRed = suit === 'hearts' || suit === 'diamonds'
-
   return (
     <div className="card" data-suit={suit}>
       <div className="card-value card-value-top">{value}</div>
