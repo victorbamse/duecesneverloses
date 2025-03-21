@@ -34,7 +34,7 @@ const getValueStrength = (value: string): number => {
 /**
  * Calculates betting odds for the AI player
  * @param aiHand The AI's hole cards
- * @param communityCards The community cards on the table
+ * @param _communityCards The community cards on the table (currently unused)
  * @param handStrength Current hand strength
  * @param pot Current pot size
  * @param aiChips AI's remaining chips
@@ -44,7 +44,7 @@ const getValueStrength = (value: string): number => {
  */
 const calculateBettingOdds = (
   aiHand: Card[],
-  communityCards: Card[],
+  _communityCards: Card[],
   handStrength: HandStrength,
   pot: number,
   aiChips: number,
