@@ -30,7 +30,7 @@ const Game: React.FC = () => {
   const [aiAction, setAiAction] = useState<string>('')
   const [needsToCall, setNeedsToCall] = useState(false)
   const [canCheck, setCanCheck] = useState(false)
-  const [lastAction, setLastAction] = useState<'none' | 'call' | 'raise' | 'check'>('none')
+  const [lastAction, setLastAction] = useState<'none' | 'call' | 'raise' | 'check' | 'fold'>('none')
   const [actionHistory, setActionHistory] = useState<string[]>([])
 
   const suits = ['hearts', 'diamonds', 'clubs', 'spades']
@@ -140,7 +140,6 @@ const Game: React.FC = () => {
         setPot(prev => prev + callAmount)
         setCurrentBet(aiCurrentBet)
         setLastAction('call')
-        addToHistory(`You call $${callAmount}`)
 
         if (gameStage === 'pre-flop') {
           if (!isPlayerDealer) {
@@ -260,96 +259,65 @@ const Game: React.FC = () => {
               addToHistory(message)
               showActionMessage(message)
               setLastAction('raise')
-              setNeedsToCall(true)
-            } else if (shouldCall) {
-              const callAmount = currentBet - aiCurrentBet
+            } else {
+              // Complete small blind
+              const callAmount = bigBlind - bigBlind / 2
               setAiChips(prev => prev - callAmount)
               setPot(prev => prev + callAmount)
-              setAiCurrentBet(currentBet)
+              setAiCurrentBet(bigBlind)
               playSound('check')
-              const message = `AI (Small Blind) calls $${callAmount}`
+              const message = 'AI (Small Blind) calls'
               addToHistory(message)
               showActionMessage(message)
               setLastAction('call')
-              setCanCheck(true)
-              setNeedsToCall(false)
-            } else {
-              // AI folds as SB
-              setGameStage('complete')
-              setChips(prev => prev + pot)
-              setGameResult('AI folded - You win!')
-              playSound('fold')
-              const message = 'AI (Small Blind) folds'
-              addToHistory(message)
-              showActionMessage(message)
-              return
             }
           }
         } else {
           // AI is BB
-          if (lastAction === 'call') {
-            // Player (SB) has called, AI gets option as BB
-            if (shouldBet) {
-              // AI decides to raise as BB
-              const actualBet = Math.min(aiBetAmount, aiChips)
-              const raiseAmount = actualBet - aiCurrentBet
-              setAiChips(prev => prev - raiseAmount)
-              setPot(prev => prev + raiseAmount)
-              setAiCurrentBet(actualBet)
-              playSound('bet')
-              const message = `AI (Big Blind) raises to $${actualBet}`
-              addToHistory(message)
-              showActionMessage(message)
-              setLastAction('raise')
-              setNeedsToCall(true)
-              setCanCheck(false)
-            } else {
-              // AI checks as BB
-              playSound('check')
-              const message = 'AI (Big Blind) checks'
-              addToHistory(message)
-              showActionMessage(message)
-              setLastAction('check')
-              dealFlop() // Only deal flop if BB checks
-            }
-          } else if (lastAction === 'raise') {
-            // Player has raised, AI needs to decide to call/re-raise/fold
-            if (shouldBet && aiBetAmount > currentBet) {
-              // AI re-raises
-              const actualBet = Math.min(aiBetAmount, aiChips)
-              const raiseAmount = actualBet - aiCurrentBet
-              setAiChips(prev => prev - raiseAmount)
-              setPot(prev => prev + raiseAmount)
-              setAiCurrentBet(actualBet)
-              playSound('bet')
-              const message = `AI (Big Blind) re-raises to $${actualBet}`
-              addToHistory(message)
-              showActionMessage(message)
-              setLastAction('raise')
-              setNeedsToCall(true)
-            } else if (shouldCall) {
-              // AI calls the raise
+          if (lastAction === 'raise') {
+            // Player has raised
+            if (shouldCall) {
               const callAmount = currentBet - aiCurrentBet
               setAiChips(prev => prev - callAmount)
               setPot(prev => prev + callAmount)
               setAiCurrentBet(currentBet)
               playSound('check')
-              const message = `AI (Big Blind) calls $${callAmount}`
+              const message = 'AI (Big Blind) calls'
               addToHistory(message)
               showActionMessage(message)
               setLastAction('call')
-              dealFlop() // Deal flop after BB calls SB's raise
             } else {
-              // AI folds to raise
-              setGameStage('complete')
-              setChips(prev => prev + pot)
-              setGameResult('AI folded - You win!')
               playSound('fold')
               const message = 'AI (Big Blind) folds'
               addToHistory(message)
               showActionMessage(message)
-              return
+              setLastAction('fold')
+              setGameStage('complete')
+              setChips(prev => prev + pot)
+              setTimeout(() => {
+                showActionMessage('Player wins!')
+                playSound('win')
+              }, 1000)
             }
+          } else if (shouldBet) {
+            // Player has just called BB
+            const actualBet = Math.min(aiBetAmount, aiChips)
+            const raiseAmount = actualBet - aiCurrentBet
+            setAiChips(prev => prev - raiseAmount)
+            setPot(prev => prev + raiseAmount)
+            setAiCurrentBet(actualBet)
+            playSound('bet')
+            const message = `AI (Big Blind) raises to $${actualBet}`
+            addToHistory(message)
+            showActionMessage(message)
+            setLastAction('raise')
+          } else {
+            // Check BB
+            playSound('check')
+            const message = 'AI (Big Blind) checks'
+            addToHistory(message)
+            showActionMessage(message)
+            setLastAction('check')
           }
         }
       } else {
@@ -406,7 +374,7 @@ const Game: React.FC = () => {
       }
 
       setIsPlayerTurn(true)
-    }, 2000 + Math.random() * 2000)
+    }, 1000)
   }
 
   const getHandScore = (handRank: HandStrength): number => {
