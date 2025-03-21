@@ -63,9 +63,9 @@ const getPositionStrength = (
 }
 
 // Main betting decision function
-const calculateBettingDecision = (
+export const calculateBettingDecision = (
   aiHand: Card[],
-  communityCards: Card[],
+  _communityCards: Card[],
   handStrength: HandStrength | null,
   pot: number,
   aiChips: number,
@@ -84,9 +84,7 @@ const calculateBettingDecision = (
 } => {
   const handKey = getHandKey(aiHand)
   const handValue = preFlopHandRankings[handKey] || 15 // Default to low value for unmapped hands
-  const positionStrength = getPositionStrength(position.isButton, position.isSB, position.isBB)
   const callAmount = currentBet - aiCurrentBet
-  const potOdds = calculatePotOdds(callAmount, pot)
   
   // Pre-flop strategy
   if (gameStage === 'pre-flop') {
@@ -201,6 +199,12 @@ const calculateBettingDecision = (
       }
     }
   }
+
+  // Default action if no other conditions are met
+  return {
+    action: 'fold',
+    amount: 0
+  }
 }
 
 // Helper function to get numeric hand score
@@ -218,7 +222,4 @@ const getHandScore = (handRank: HandStrength): number => {
     'High Card': 1
   }
   return rankScores[handRank.rank] || 0
-}
-
-// Export the function
-export { calculateBettingDecision } 
+} 
