@@ -1,15 +1,12 @@
 .menu-container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  background-color: #1a1a1a;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+  color: white;
 }
 
 .menu-container h1 {
@@ -21,34 +18,113 @@
 
 .menu-options {
   display: flex;
-  gap: 2rem;
-  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .menu-card {
-  background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
-  padding: 2rem;
-  border-radius: 1rem;
-  width: 300px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  width: 250px;
+  text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background 0.2s;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .menu-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .menu-card h2 {
-  color: #ffd700;
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+  margin: 0 0 10px 0;
+  color: #00ff88;
 }
 
 .menu-card p {
+  margin: 0;
+  font-size: 0.9em;
   color: #cccccc;
-  font-size: 1.1rem;
-  line-height: 1.5;
+}
+
+.join-game-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-content h2 {
+  margin: 0 0 20px 0;
+  color: #00ff88;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  background: #2a2a2a;
+  color: white;
+  font-size: 1.1em;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.modal-content input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #00ff88;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.modal-buttons button:first-child {
+  background: #00ff88;
+  color: #1a1a1a;
+}
+
+.modal-buttons button:last-child {
+  background: #2a2a2a;
+  color: white;
+}
+
+.modal-buttons button:hover {
+  transform: translateY(-2px);
 } 
