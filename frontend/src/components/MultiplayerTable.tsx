@@ -21,6 +21,27 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
   const [pot, setPot] = useState(0);
   const [currentBet, setCurrentBet] = useState(0);
   const [gameStage, setGameStage] = useState<'pre-flop' | 'flop' | 'turn' | 'river'>('pre-flop');
+  const [betAmount, setBetAmount] = useState(20); // Default bet amount
+
+  const handleFold = () => {
+    // TODO: Implement fold logic with WebSocket
+    console.log('Fold');
+  };
+
+  const handleCheck = () => {
+    // TODO: Implement check logic with WebSocket
+    console.log('Check');
+  };
+
+  const handleCall = () => {
+    // TODO: Implement call logic with WebSocket
+    console.log('Call');
+  };
+
+  const handleRaise = () => {
+    // TODO: Implement raise logic with WebSocket
+    console.log('Raise', betAmount);
+  };
 
   useEffect(() => {
     // TODO: Set up WebSocket connection here
@@ -74,12 +95,21 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
       </div>
       
       <div className="game-controls">
-        <button className="action-button fold">Fold</button>
-        <button className="action-button check">Check</button>
-        <button className="action-button call">Call</button>
+        <button className="action-button fold" onClick={handleFold}>Fold</button>
+        <button className="action-button check" onClick={handleCheck}>Check</button>
+        <button className="action-button call" onClick={handleCall}>Call</button>
         <div className="raise-controls">
-          <input type="range" min="1" max="100" className="raise-slider" />
-          <button className="action-button raise">Raise</button>
+          <input 
+            type="range" 
+            min="20" 
+            max="100" 
+            value={betAmount}
+            onChange={(e) => setBetAmount(parseInt(e.target.value))}
+            className="raise-slider" 
+          />
+          <button className="action-button raise" onClick={handleRaise}>
+            Raise to ${betAmount}
+          </button>
         </div>
       </div>
     </div>
