@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 import '../styles/MultiplayerTable.css';
 import { Card } from '../utils/pokerAI';
 
@@ -31,7 +31,7 @@ const SOCKET_URL = process.env.NODE_ENV === 'production'
   : 'http://localhost:3001';
 
 const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
   const [gameState, setGameState] = useState<GameState>({
     id: gameId,
     players: [],
