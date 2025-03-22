@@ -16,11 +16,12 @@ interface MultiplayerTableProps {
 }
 
 const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [communityCards, setCommunityCards] = useState<Card[]>([]);
-  const [pot, setPot] = useState(0);
-  const [currentBet, setCurrentBet] = useState(0);
-  const [gameStage, setGameStage] = useState<'pre-flop' | 'flop' | 'turn' | 'river'>('pre-flop');
+  // Game state
+  const [players] = useState<Player[]>([]);
+  const [communityCards] = useState<Card[]>([]);
+  const [pot] = useState(0);
+  const [currentBet] = useState(0);
+  const [gameStage] = useState<'pre-flop' | 'flop' | 'turn' | 'river'>('pre-flop');
   const [betAmount, setBetAmount] = useState(20); // Default bet amount
 
   const handleFold = () => {
