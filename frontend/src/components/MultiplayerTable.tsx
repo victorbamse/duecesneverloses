@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
+import io from 'socket.io-client';
 import '../styles/MultiplayerTable.css';
 import { Card } from '../utils/pokerAI';
 
