@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 import '../styles/MultiplayerTable.css';
 import { Card } from '../utils/pokerAI';
 
@@ -11,60 +12,111 @@ interface Player {
   position: 'dealer' | 'small_blind' | 'big_blind' | 'other';
 }
 
+interface GameState {
+  id: string;
+  players: Player[];
+  communityCards: Card[];
+  pot: number;
+  currentBet: number;
+  gameStage: 'pre-flop' | 'flop' | 'turn' | 'river';
+  activePlayer?: string;
+}
+
 interface MultiplayerTableProps {
   gameId: string;
 }
 
+const SOCKET_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://duecesneverloses.se' 
+  : 'http://localhost:3001';
+
 const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
-  // Game state
-  const [players] = useState<Player[]>([]);
-  const [communityCards] = useState<Card[]>([]);
-  const [pot] = useState(0);
-  const [currentBet] = useState(0);
-  const [gameStage] = useState<'pre-flop' | 'flop' | 'turn' | 'river'>('pre-flop');
-  const [betAmount, setBetAmount] = useState(20); // Default bet amount
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [gameState, setGameState] = useState<GameState>({
+    id: gameId,
+    players: [],
+    communityCards: [],
+    pot: 0,
+    currentBet: 0,
+    gameStage: 'pre-flop'
+  });
+  const [betAmount, setBetAmount] = useState(20);
+  const [playerName] = useState(`Player${Math.floor(Math.random() * 1000)}`);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const newSocket = io(SOCKET_URL);
+    setSocket(newSocket);
+
+    newSocket.on('connect', () => {
+      console.log('Connected to server');
+      // Join the game with a random player name
+      newSocket.emit('joinGame', { gameId, playerName });
+    });
+
+    newSocket.on('error', (message: string) => {
+      setError(message);
+    });
+
+    newSocket.on('gameJoined', (state: GameState) => {
+      setGameState(state);
+      setError(null);
+    });
+
+    newSocket.on('gameStateUpdated', (state: GameState) => {
+      setGameState(state);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [gameId, playerName]);
 
   const handleFold = () => {
-    // TODO: Implement fold logic with WebSocket
-    console.log('Fold');
+    if (socket) {
+      socket.emit('playerAction', { gameId, action: 'fold' });
+    }
   };
 
   const handleCheck = () => {
-    // TODO: Implement check logic with WebSocket
-    console.log('Check');
+    if (socket) {
+      socket.emit('playerAction', { gameId, action: 'check' });
+    }
   };
 
   const handleCall = () => {
-    // TODO: Implement call logic with WebSocket
-    console.log('Call');
+    if (socket) {
+      socket.emit('playerAction', { gameId, action: 'call' });
+    }
   };
 
   const handleRaise = () => {
-    // TODO: Implement raise logic with WebSocket
-    console.log('Raise', betAmount);
+    if (socket) {
+      socket.emit('playerAction', { gameId, action: 'raise', amount: betAmount });
+    }
   };
 
-  useEffect(() => {
-    // TODO: Set up WebSocket connection here
-    console.log(`Connecting to game: ${gameId}`);
-    
-    // Cleanup function
-    return () => {
-      // TODO: Clean up WebSocket connection
-      console.log('Disconnecting from game');
-    };
-  }, [gameId]);
+  if (error) {
+    return (
+      <div className="error-message">
+        Error: {error}
+      </div>
+    );
+  }
+
+  const currentPlayer = gameState.players.find(p => socket?.id === p.id);
+  const isPlayerTurn = gameState.activePlayer === socket?.id;
 
   return (
     <div className="multiplayer-table">
       <div className="table-info">
-        <div className="pot">Pot: ${pot}</div>
-        <div className="current-bet">Current Bet: ${currentBet}</div>
-        <div className="game-stage">{gameStage.toUpperCase()}</div>
+        <div className="pot">Pot: ${gameState.pot}</div>
+        <div className="current-bet">Current Bet: ${gameState.currentBet}</div>
+        <div className="game-stage">{gameState.gameStage.toUpperCase()}</div>
       </div>
       
       <div className="community-cards">
-        {communityCards.map((card, index) => (
+        {gameState.communityCards.map((card, index) => (
           <div key={index} className="card">
             {card.value} of {card.suit}
           </div>
@@ -72,17 +124,17 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
       </div>
       
       <div className="players">
-        {players.map((player) => (
+        {gameState.players.map((player) => (
           <div 
             key={player.id} 
-            className={`player ${player.isActive ? 'active' : ''}`}
+            className={`player ${player.isActive ? 'active' : ''} ${player.id === socket?.id ? 'current-player' : ''}`}
           >
             <div className="player-info">
               <div className="player-name">{player.name}</div>
               <div className="player-chips">${player.chips}</div>
               <div className="player-position">{player.position}</div>
             </div>
-            {player.cards && (
+            {(player.cards && player.id === socket?.id) && (
               <div className="player-cards">
                 {player.cards.map((card, index) => (
                   <div key={index} className="card">
@@ -95,24 +147,49 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
         ))}
       </div>
       
-      <div className="game-controls">
-        <button className="action-button fold" onClick={handleFold}>Fold</button>
-        <button className="action-button check" onClick={handleCheck}>Check</button>
-        <button className="action-button call" onClick={handleCall}>Call</button>
-        <div className="raise-controls">
-          <input 
-            type="range" 
-            min="20" 
-            max="100" 
-            value={betAmount}
-            onChange={(e) => setBetAmount(parseInt(e.target.value))}
-            className="raise-slider" 
-          />
-          <button className="action-button raise" onClick={handleRaise}>
-            Raise to ${betAmount}
+      {currentPlayer && (
+        <div className="game-controls">
+          <button 
+            className="action-button fold" 
+            onClick={handleFold}
+            disabled={!isPlayerTurn}
+          >
+            Fold
           </button>
+          <button 
+            className="action-button check" 
+            onClick={handleCheck}
+            disabled={!isPlayerTurn}
+          >
+            Check
+          </button>
+          <button 
+            className="action-button call" 
+            onClick={handleCall}
+            disabled={!isPlayerTurn}
+          >
+            Call
+          </button>
+          <div className="raise-controls">
+            <input 
+              type="range" 
+              min="20" 
+              max={currentPlayer.chips} 
+              value={betAmount}
+              onChange={(e) => setBetAmount(parseInt(e.target.value))}
+              className="raise-slider"
+              disabled={!isPlayerTurn}
+            />
+            <button 
+              className="action-button raise" 
+              onClick={handleRaise}
+              disabled={!isPlayerTurn}
+            >
+              Raise to ${betAmount}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
