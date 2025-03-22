@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import GameLobby from './components/GameLobby';
-import MultiplayerTable from './components/MultiplayerTable';
+import PokerTable from './components/PokerTable';
 import './App.css';
 
 const App: React.FC = () => {
@@ -10,7 +10,7 @@ const App: React.FC = () => {
       <div className="App">
         <Routes>
           <Route path="/" element={<GameLobby />} />
-          <Route path="/game/:gameId" element={<MultiplayerTable />} />
+          <Route path="/game/:gameId" element={<PokerTable />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

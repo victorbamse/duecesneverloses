@@ -49,20 +49,17 @@
   box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
 }
 
-.form-group button {
+.create-game-btn {
   padding: 12px 24px;
+  background: #00ff9d;
+  color: black;
   border: none;
   border-radius: 6px;
   font-size: 1.1em;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  font-weight: bold;
-}
-
-.create-game-btn {
-  background: #00ff9d;
-  color: black;
 }
 
 .create-game-btn:hover {
@@ -71,43 +68,11 @@
   box-shadow: 0 4px 12px rgba(0, 255, 157, 0.3);
 }
 
-.join-game-btn {
-  background: #2d2d2d;
-  color: #00ff9d;
-  border: 2px solid #00ff9d;
-}
-
-.join-game-btn:hover {
-  background: #00ff9d;
-  color: black;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 255, 157, 0.3);
-}
-
-.form-divider {
+.info-text {
   text-align: center;
-  color: #666;
-  font-weight: bold;
-  position: relative;
-  margin: 20px 0;
-}
-
-.form-divider::before,
-.form-divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 45%;
-  height: 1px;
-  background: #666;
-}
-
-.form-divider::before {
-  left: 0;
-}
-
-.form-divider::after {
-  right: 0;
+  color: #888;
+  font-style: italic;
+  margin-top: 10px;
 }
 
 .error-message {

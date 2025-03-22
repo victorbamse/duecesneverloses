@@ -4,7 +4,6 @@ import '../styles/GameLobby.css';
 
 const GameLobby: React.FC = () => {
   const [playerName, setPlayerName] = useState('');
-  const [gameCode, setGameCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -24,18 +23,6 @@ const GameLobby: React.FC = () => {
     }
     const newGameCode = generateGameCode();
     navigate(`/game/${newGameCode}?host=true&name=${encodeURIComponent(playerName)}`);
-  };
-
-  const handleJoinGame = () => {
-    if (!playerName.trim()) {
-      setError('Please enter your name');
-      return;
-    }
-    if (!gameCode.trim()) {
-      setError('Please enter a game code');
-      return;
-    }
-    navigate(`/game/${gameCode}?name=${encodeURIComponent(playerName)}`);
   };
 
   return (
@@ -61,24 +48,8 @@ const GameLobby: React.FC = () => {
           </button>
         </div>
 
-        <div className="form-divider">OR</div>
-
-        <div className="form-group">
-          <label htmlFor="gameCode">Game Code:</label>
-          <input
-            type="text"
-            id="gameCode"
-            value={gameCode}
-            onChange={(e) => setGameCode(e.target.value.toUpperCase())}
-            placeholder="Enter game code"
-            maxLength={6}
-          />
-        </div>
-
-        <div className="form-group">
-          <button className="join-game-btn" onClick={handleJoinGame}>
-            Join Game
-          </button>
+        <div className="info-text">
+          Create a game and share the link with your friends to play together!
         </div>
 
         {error && <div className="error-message">{error}</div>}
