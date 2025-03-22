@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import '../styles/MultiplayerTable.css';
 import { Card } from '../utils/pokerAI';
@@ -22,18 +23,20 @@ interface GameState {
   activePlayer?: string;
 }
 
-interface MultiplayerTableProps {
-  gameId: string;
-}
-
 const SOCKET_URL = process.env.NODE_ENV === 'production' 
   ? 'https://duecesneverloses.se' 
   : 'http://localhost:3001';
 
-const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
+const MultiplayerTable: React.FC = () => {
+  const { gameId } = useParams<{ gameId: string }>();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const playerName = searchParams.get('name');
+  const isHost = searchParams.get('host') === 'true';
+
   const [socket, setSocket] = useState<ReturnType<typeof io> | null>(null);
   const [gameState, setGameState] = useState<GameState>({
-    id: gameId,
+    id: gameId || '',
     players: [],
     communityCards: [],
     pot: 0,
@@ -41,21 +44,31 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
     gameStage: 'pre-flop'
   });
   const [betAmount, setBetAmount] = useState(20);
-  const [playerName] = useState(`Player${Math.floor(Math.random() * 1000)}`);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!gameId || !playerName) {
+      navigate('/');
+      return;
+    }
+
     const newSocket = io(SOCKET_URL);
     setSocket(newSocket);
 
     newSocket.on('connect', () => {
       console.log('Connected to server');
-      // Join the game with a random player name
-      newSocket.emit('joinGame', { gameId, playerName });
+      newSocket.emit('joinGame', { 
+        gameId, 
+        playerName,
+        isHost 
+      });
     });
 
     newSocket.on('error', (message: string) => {
       setError(message);
+      if (message === 'Game not found') {
+        setTimeout(() => navigate('/'), 3000);
+      }
     });
 
     newSocket.on('gameJoined', (state: GameState) => {
@@ -70,7 +83,7 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
     return () => {
       newSocket.disconnect();
     };
-  }, [gameId, playerName]);
+  }, [gameId, playerName, isHost, navigate]);
 
   const handleFold = () => {
     if (socket) {
@@ -109,10 +122,13 @@ const MultiplayerTable: React.FC<MultiplayerTableProps> = ({ gameId }) => {
 
   return (
     <div className="multiplayer-table">
-      <div className="table-info">
-        <div className="pot">Pot: ${gameState.pot}</div>
-        <div className="current-bet">Current Bet: ${gameState.currentBet}</div>
-        <div className="game-stage">{gameState.gameStage.toUpperCase()}</div>
+      <div className="game-info">
+        <div className="game-code">Game Code: {gameId}</div>
+        <div className="table-info">
+          <div className="pot">Pot: ${gameState.pot}</div>
+          <div className="current-bet">Current Bet: ${gameState.currentBet}</div>
+          <div className="game-stage">{gameState.gameStage.toUpperCase()}</div>
+        </div>
       </div>
       
       <div className="community-cards">

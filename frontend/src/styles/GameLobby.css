@@ -1,0 +1,120 @@
+.game-lobby {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.game-lobby h1 {
+  text-align: center;
+  color: #00ff9d;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+}
+
+.lobby-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 1.1em;
+  color: #00ff9d;
+}
+
+.form-group input {
+  padding: 12px;
+  border: 2px solid #00ff9d;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 1em;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #00ffa2;
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+}
+
+.form-group button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.create-game-btn {
+  background: #00ff9d;
+  color: black;
+}
+
+.create-game-btn:hover {
+  background: #00ffa2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 157, 0.3);
+}
+
+.join-game-btn {
+  background: #2d2d2d;
+  color: #00ff9d;
+  border: 2px solid #00ff9d;
+}
+
+.join-game-btn:hover {
+  background: #00ff9d;
+  color: black;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 157, 0.3);
+}
+
+.form-divider {
+  text-align: center;
+  color: #666;
+  font-weight: bold;
+  position: relative;
+  margin: 20px 0;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #666;
+}
+
+.form-divider::before {
+  left: 0;
+}
+
+.form-divider::after {
+  right: 0;
+}
+
+.error-message {
+  color: #ff4444;
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 68, 68, 0.1);
+  border-radius: 6px;
+  border: 1px solid #ff4444;
+} 

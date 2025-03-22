@@ -1,34 +1,21 @@
-import { useState } from "react";
-import "./App.css";
-import Menu from "./components/Menu";
-import Game from "./components/Game";
-import MultiplayerTable from "./components/MultiplayerTable";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import GameLobby from './components/GameLobby';
+import MultiplayerTable from './components/MultiplayerTable';
+import './App.css';
 
-function App() {
-  const [gameMode, setGameMode] = useState<'menu' | 'ai' | 'multiplayer'>('menu');
-  const [gameId, setGameId] = useState<string | null>(null);
-
-  const handleGameModeSelect = (mode: 'ai' | 'multiplayer', newGameId?: string) => {
-    setGameMode(mode);
-    if (mode === 'multiplayer' && newGameId) {
-      setGameId(newGameId);
-    }
-  };
-
+const App: React.FC = () => {
   return (
-    <div className="app">
-      {gameMode === 'menu' && <Menu onGameModeSelect={handleGameModeSelect} />}
-      {gameMode === 'ai' && <Game />}
-      {gameMode === 'multiplayer' && gameId && (
-        <div className="multiplayer-container">
-          <div className="game-id-display">
-            Game Code: <span>{gameId}</span>
-          </div>
-          <MultiplayerTable gameId={gameId} />
-        </div>
-      )}
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<GameLobby />} />
+          <Route path="/game/:gameId" element={<MultiplayerTable />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App; 
